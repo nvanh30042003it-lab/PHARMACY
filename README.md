@@ -103,6 +103,3 @@ py -m pytest -q
 docker-compose up --build -d
 ```
 
-## ⭐ Tác giả
-
-Pharmacy ANHDUONG
