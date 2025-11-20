@@ -4,7 +4,7 @@ Hệ thống **Pharmacy Backend + Frontend**
 
 * Backend: FastAPI + SQLModel
 * Frontend: HTML/Tailwind + JS
-* JWT Auth, Products CRUD, Orders, Upload ảnh
+* JWT Auth, Products CRUD, Orders
 * Docker deploy, Unit testing
 
 ## 🚀 Công Nghệ
