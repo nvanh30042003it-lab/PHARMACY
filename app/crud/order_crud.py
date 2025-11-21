@@ -14,21 +14,42 @@ def create_order(session: Session, user, order_data) -> Order:
     total = Decimal(0)
     items_data: list[dict] = []
 
-    # 1. Kiểm tra sản phẩm + tính tiền
-    for item in order_data.cart_items:
-        product = session.get(Product, item.product_id)
-        if not product:
-            raise Exception(f"Sản phẩm ID {item.product_id} không tồn tại")
+    # Support both dict-based and object-based order_data
+    if isinstance(order_data, dict):
+        cart_items = order_data.get("cart_items", [])
+        address = order_data.get("address")
+        phone_number = order_data.get("phone_number")
+    else:
+        cart_items = getattr(order_data, "cart_items", [])
+        address = getattr(order_data, "address", None)
+        phone_number = getattr(order_data, "phone_number", None)
 
-        if product.stock < item.quantity:
+    # 1. Kiểm tra sản phẩm + tính tiền
+    for item in cart_items:
+        # item may be a dict or an object
+        if isinstance(item, dict):
+            product_id = item.get("product_id")
+            quantity = item.get("quantity")
+        else:
+            product_id = getattr(item, "product_id", None)
+            quantity = getattr(item, "quantity", None)
+
+        if product_id is None or quantity is None:
+            raise Exception("Invalid cart item format")
+
+        product = session.get(Product, product_id)
+        if not product:
+            raise Exception(f"Sản phẩm ID {product_id} không tồn tại")
+
+        if product.stock < quantity:
             raise Exception(f"Tồn kho không đủ cho sản phẩm: {product.name}")
 
         price = product.price
-        total += price * item.quantity
+        total += price * quantity
 
         items_data.append({
             "product": product,
-            "quantity": item.quantity,
+            "quantity": quantity,
             "price": price,
         })
 
@@ -36,8 +57,8 @@ def create_order(session: Session, user, order_data) -> Order:
     order = Order(
         user_id=user.id,
         total_amount=total,
-        address=order_data.address,
-        phone_number=order_data.phone_number,
+        address=address,
+        phone_number=phone_number,
         payment_status="Pending",
     )
     session.add(order)
@@ -59,6 +80,12 @@ def create_order(session: Session, user, order_data) -> Order:
         session.add(i["product"])
 
     session.commit()
+
+    # Attach created items and user to returned order for convenience
+    items = session.exec(select(OrderItem).where(OrderItem.order_id == order.id)).all()
+    object.__setattr__(order, 'items', items)
+    object.__setattr__(order, 'user', session.exec(select(User).where(User.id == order.user_id)).first())
+
     return order
 
 

@@ -1,6 +1,9 @@
 import hashlib
 import bcrypt
-import jwt
+try:
+    import jwt
+except ImportError:  # pragma: no cover - environment may not have pyjwt installed
+    jwt = None
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 
@@ -39,6 +42,9 @@ def create_access_token(data: dict, expires_minutes: int = None):
     )
     to_encode.update({"exp": expire})
 
+    if jwt is None:
+        raise RuntimeError("pyjwt is not installed. Install with 'pip install pyjwt'")
+
     encoded_jwt = jwt.encode(
         to_encode,
         settings.SECRET_KEY,
@@ -53,15 +59,16 @@ def create_access_token(data: dict, expires_minutes: int = None):
 # ============================
 
 def decode_token(token: str):
+    if jwt is None:
+        return None
+
     try:
         return jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM],
         )
-    except jwt.ExpiredSignatureError:
-        return None
-    except jwt.InvalidTokenError:
+    except Exception:
         return None
 
 

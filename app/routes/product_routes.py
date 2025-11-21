@@ -53,6 +53,18 @@ def admin_get_product(
     return product
 
 
+# ============= PUBLIC: get single product =============
+@router.get("/{product_id}", response_model=ProductRead)
+def get_single_product(
+    product_id: int,
+    session: Session = Depends(get_session),
+):
+    product = get_product(session, product_id)
+    if not product:
+        raise HTTPException(404, "Không tìm thấy sản phẩm")
+    return product
+
+
 @router.post("/admin", response_model=ProductRead)
 def admin_create_product(
     data: ProductCreate,
