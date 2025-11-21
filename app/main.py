@@ -13,26 +13,24 @@ from app.routes.product_routes import router as product_router
 from app.routes.order_routes import router as order_router
 from app.routes.admin_routes import router as admin_router
 
-#AI
+# AI
 from app.routes.ai_chat_routes import router as ai_chat_router
 
-# ==========================
-# CREATE APP
-# ==========================
 
 app = FastAPI(title="Pharmacy Backend ", version="1.0.0")
 app.include_router(ai_chat_router)
 
-
 # ==========================
-# CORS CONFIG
+# CORS CONFIG (FIXED)
 # ==========================
 
 origins = [
     "http://127.0.0.1:5500",
     "http://localhost:5500",
-    "https://pharmacy-ilgm.onrender.com",
+    "https://pharmacy3004.onrender.com",
+    "https://pharmacy-frontend-z60m.onrender.com",  # FRONTEND RENDER
 ]
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -41,15 +39,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # ==========================
 # CREATE DEFAULT ADMIN
 # ==========================
 
-
 def create_default_admin():
     with Session(engine) as session:
-        # Kiểm tra admin đã tồn tại chưa
         admin = session.exec(
             select(User).where(User.username == "adminpharmacy")
         ).first()
@@ -66,11 +61,9 @@ def create_default_admin():
         else:
             print("✔ Admin đã tồn tại.")
 
-
 # ==========================
 # STARTUP EVENT
 # ==========================
-
 
 @app.on_event("startup")
 def startup_event():
@@ -82,7 +75,6 @@ def startup_event():
 
     print("🚀 Hệ thống backend đã sẵn sàng!")
 
-
 # ==========================
 # ROUTES
 # ==========================
@@ -93,11 +85,9 @@ app.include_router(product_router)
 app.include_router(order_router)
 app.include_router(admin_router)
 
-
 # ==========================
 # ROOT
 # ==========================
-
 
 @app.get("/")
 def root():
