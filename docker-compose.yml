@@ -21,10 +21,10 @@ services:
   app:
     build: . 
     container_name: pharmacy_fastapi_app
-    # Đã sửa lỗi import module bằng cách trỏ đúng đến app.main:app
+  
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload 
     volumes:
-      # Volumes phải khớp với WORKDIR trong Dockerfile
+     
       - .:/usr/src/app 
     ports:
       - "8000:8000"
