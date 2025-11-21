@@ -301,7 +301,11 @@
 // CONFIG
 ////////////////////////////////////////////////////////
 
-const API_BASE_URL = "https://pharmacy-ilgm.onrender.com";
+// Detect environment: use localhost for development, production URL otherwise
+const API_BASE_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+  ? `http://${window.location.hostname}:8000`
+  : "https://pharmacy-ilgm.onrender.com";
+
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let currentUser = JSON.parse(localStorage.getItem("user"));
 let authToken = localStorage.getItem("token");
